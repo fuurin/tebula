@@ -2,6 +2,7 @@ import traceback
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
+from django.http import JsonResponse
 from .modules.recipe import Recipe
 from .modules.senders import get_sender_for
 from .modules.crawler import crawl
@@ -29,13 +30,38 @@ def register(request):
 	
 	return HttpResponse(result)
 
-def recipe(request):
+def recipe(request):	
 	if current_recipe:
-		response = HttpResponse(f"レシピID: {current_recipe.recipe_id} が設定されています")
+		return JsonResponse({
+			'recipe': {
+				'recipe_id': current_recipe.recipe_id,
+				'current_step': current_recipe.step,
+				'content': current_recipe.content
+			},
+			'cooking': True
+		})
 	else:
-		response = HttpResponse("レシピIDが設定されていません")
+		return JsonResponse({
+			'recipe': {
+				'recipe_id': None,
+				'current_step': -1,
+				'content': None
+			},
+			'cooking': False
+		})
 
-	return response
+
+def current_step(request):
+	if current_recipe:
+		return JsonResponse({
+			'current_step': current_recipe.step,
+			'cooking': True
+		})
+	else:
+		return JsonResponse({
+			'current_step': -1,
+			'cooking': False
+		})
 
 def step(request):
 	if current_recipe:
