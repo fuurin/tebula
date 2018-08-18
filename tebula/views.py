@@ -6,16 +6,20 @@ from .modules.crawler import crawl
 
 sender = get_sender_for(platform='LINE')
 current_recipe = None
+current_recipe_changed=False
 
 
 def register(request):
 	global current_recipe
+	global current_recipe_changed
+
 	recipe_id = request.GET.get('recipe_id')
 	try:
 		current_recipe = crawl(recipe_id)
 	except Exception as e:
 		return HttpResponse(str(e))
 
+	current_recipe_changed = True
 	result = f'レシピID: {recipe_id} レシピタイトル: {current_recipe.content["title"]} が設定されました\n'
 
 	try:
@@ -55,3 +59,11 @@ def next_step(request):
 	if current_recipe.end:
 		current_recipe = None
 	return response
+
+def listen(request):
+	global current_recipe_changed
+	if current_recipe_changed:
+		current_recipe_changed = False
+		return HttpResponse(current_recipe.content['title'])
+	else:
+		return HttpResponse("")
