@@ -2,29 +2,21 @@ import requests
 import json
 from bs4 import BeautifulSoup
 import emoji
+from .recipe import Recipe
 
 
-def remove_emoji(s):
-    return "".join(c for c in s if c not in emoji.UNICODE_EMOJI)
-
-
-def crawl(recipe_id, do_remove_emoji=True):
-
+def crawl(recipe_id):
     recipe = dict()
     source_url = "https://cookpad.com/recipe/{}".format(recipe_id)
     r = requests.get(source_url)
     if r.status_code != 200:
-        recipe['success'] = 0
-        return json.dumps(recipe)
+        raise ValueError(f'Recipe (recipe_id={recipe_id}) not found.')
 
     html = r.text
     soup = BeautifulSoup(html)
 
-
     def get_title():
         title = soup.h1.text.strip()
-        if do_remove_emoji:
-            title = remove_emoji(title)
         return title
 
     def get_img_url():
@@ -40,18 +32,12 @@ def crawl(recipe_id, do_remove_emoji=True):
             servings = soup.find("span", class_="servings_for").text.strip().strip("(（）)")
         except AttributeError:
             return ""
-        
-        if do_remove_emoji:
-            servings = remove_emoji(servings)
         return servings
 
 
     def get_ingredient(ingredient_tag):
         name = ingredient_tag.find("div", class_="ingredient_name").text.strip()
         quantity = ingredient_tag.find("div", class_="ingredient_quantity").text.strip()
-        if do_remove_emoji:
-            name = remove_emoji(name)
-            quantity = remove_emoji(quantity)
         return {"name": name, "quantity": quantity}
 
 
@@ -71,8 +57,6 @@ def crawl(recipe_id, do_remove_emoji=True):
             img_url = img_tag["src"]
         else:
             img_url = ""
-        if do_remove_emoji:
-            step = remove_emoji(step)
         return {"text": step, "img_url": img_url}
 
     
@@ -84,7 +68,7 @@ def crawl(recipe_id, do_remove_emoji=True):
                 steps.append(step)
         return steps
 
-    recipe['success'] = 1
+    recipe['success'] = True
     recipe['source_url'] = source_url
     recipe['title'] = get_title()
     recipe['img_url'] = get_img_url()
@@ -92,4 +76,7 @@ def crawl(recipe_id, do_remove_emoji=True):
     recipe['ingredients'] = get_ingredients()
     recipe['steps'] = get_steps()
 
-    return json.dumps(recipe)
+    return Recipe(
+        recipe_id=recipe_id,
+        content=recipe
+    )
