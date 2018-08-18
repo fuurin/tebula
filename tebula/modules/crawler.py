@@ -91,5 +91,5 @@ def crawl(recipe_id, do_remove_emoji=True):
     recipe['servings'] = get_servings()
     recipe['ingredients'] = get_ingredients()
     recipe['steps'] = get_steps()
-
+    
     return json.dumps(recipe)

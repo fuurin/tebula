@@ -27,7 +27,7 @@ def recipe(request):
 def step(request):
 
 	if userdata.isset():
-		response = HttpResponse("今はステップ {0} です".format(userdata.recipe_step))
+		response = HttpResponse("今はステップ {0} {1} です".format(userdata.recipe_step, userdata.scraping_result["steps"][userdata.recipe_step]["text"]))
 	else:
 		response = HttpResponse("レシピIDが設定されていません")
 
@@ -37,7 +37,10 @@ def next_step(request):
 	
 	if userdata.isset():
 		userdata.next_step()
-		response = HttpResponse("ステップ {0} になりました".format(userdata.recipe_step))
+		try:
+			response = HttpResponse("ステップ {0} {1} になりました".format(userdata.recipe_step, userdata.scraping_result["steps"][userdata.recipe_step]["text"]))
+		except IndexError:
+			response = HttpResponse("これ以上ステップはありません")
 	else:
 		response = HttpResponse("レシピIDが設定されていません")
 

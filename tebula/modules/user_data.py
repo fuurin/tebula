@@ -34,6 +34,7 @@ class UserData():
 	def next_step(self):
 		if self._recipe_step != None:
 			self._recipe_step = self._recipe_step + 1
+    				
 
 	@property
 	def scraping_result(self):
