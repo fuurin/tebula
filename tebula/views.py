@@ -96,7 +96,7 @@ def next_step(request):
 	return response
 
 def listen(request):
-    global current_recipe_changed
+	global current_recipe_changed
 	if current_recipe_changed:
 		current_recipe_changed = False
 		return HttpResponse(current_recipe.content['title'])
