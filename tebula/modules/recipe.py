@@ -18,6 +18,9 @@ class Recipe():
 	def next_step(self):
 		self.__recipe_step += 1
 
+	def prev_step(self):
+		self.__recipe_step -= 1
+
 	@property
 	def end(self):
 		return self.__recipe_step >= len(self.__content['steps']) - 1

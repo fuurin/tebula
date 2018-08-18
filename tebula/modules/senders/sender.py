@@ -1,9 +1,9 @@
 class BaseSender:
     def __init__(self):
-        pass
+        self.platform = 'Empty'
 
     def send_recipe(self, recipe):
         pass
 
-    def send_step(self, index, recipe):
+    def send_step(self, recipe):
         pass
