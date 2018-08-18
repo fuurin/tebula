@@ -23,9 +23,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'mq=_lrydz7s!6&w0(p)iowi&+ua(4capqxd!%ek9sibs-nunlb'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = (os.environ.get('PRODUCTION') != 'True')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "tebula.herokuapp.com",
+]
 
 
 # Application definition
