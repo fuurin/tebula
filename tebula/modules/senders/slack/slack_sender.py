@@ -31,14 +31,14 @@ class SlackSender:
 			raise ValueError(
 				f'cannot init SlackSender: Missing workspace access token.'
 				f' Specify workspace access token by argument or environment variable'
-				f' {LINESender.ENV_WORKSPACE_ACCESS_TOKEN}.'
+				f' {SlackSender.ENV_WORKSPACE_ACCESS_TOKEN}.'
 			)
 
 		if self.destination is None:
 			raise ValueError(
 				f'cannot init SlackSender: Missing sender destination.'
 				f' Specify sender destination by argument or enviroment variable'
-				f' {LINESender.ENV_DESTINATION_ID}'
+				f' {SlackSender.ENV_DESTINATION_ID}'
 			)
 
 	def send_recipe(self, recipe):
