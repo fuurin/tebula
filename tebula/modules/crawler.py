@@ -64,9 +64,16 @@ def crawl(recipe_id, do_remove_emoji=True):
 
     def get_step(step_tag):
         step = step_tag.text.strip()
+        step_id = step_tag['id'].split('_')[-1]
+        div_tag = soup.find("div", id="recipe-step_photo_{}".format(step_id))
+        img_tag = div_tag.find("img")
+        if img_tag:
+            img_url = img_tag["src"]
+        else:
+            img_url = ""
         if do_remove_emoji:
             step = remove_emoji(step)
-        return step
+        return {"text": step, "img_url": img_url}
 
     
     def get_steps():

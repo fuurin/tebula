@@ -9,7 +9,7 @@ def register(request):
 	userdata.recipe_id = recipe_id
 
 	if userdata.isset() and userdata.scraping_result['success']:
-		response = HttpResponse("レシピID: {0} レシピタイトル: {1} が設定されました".format(userdata.recipe_id, userdata.scraping_result['title']))
+    		response = HttpResponse("レシピID: {0} レシピタイトル: {1} が設定されました".format(userdata.recipe_id, userdata.scraping_result['title']))
 	else:
 		response = HttpResponse("そのレシピIDは存在しません")
 	
