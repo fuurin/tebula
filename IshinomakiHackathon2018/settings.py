@@ -26,6 +26,8 @@ SECRET_KEY = 'mq=_lrydz7s!6&w0(p)iowi&+ua(4capqxd!%ek9sibs-nunlb'
 DEBUG = (os.environ.get('PRODUCTION') != 'True')
 
 ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
     "tebula.herokuapp.com",
 ]
 
