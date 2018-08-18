@@ -38,7 +38,6 @@ def recipe(request):
 				'current_step': current_recipe.step,
 				'content': current_recipe.content
 			},
-			'cooking': True
 		})
 	else:
 		return JsonResponse({
@@ -47,7 +46,6 @@ def recipe(request):
 				'current_step': -1,
 				'content': None
 			},
-			'cooking': False
 		})
 
 
@@ -55,12 +53,10 @@ def current_step(request):
 	if current_recipe:
 		return JsonResponse({
 			'current_step': current_recipe.step,
-			'cooking': True
 		})
 	else:
 		return JsonResponse({
 			'current_step': -1,
-			'cooking': False
 		})
 
 def step(request):
@@ -76,8 +72,8 @@ def next_step(request):
 
 	if not current_recipe:
 		return HttpResponse("レシピIDが設定されていません")
-
-	current_recipe.next_step()
+	if not current_recipe.end:
+		current_recipe.next_step()
 	result = f"ステップ {current_recipe.step} になりました"
 	try:
 		sender.send_step(current_recipe)
@@ -86,8 +82,7 @@ def next_step(request):
 		result += traceback.format_exc()
 
 	response = HttpResponse(result)
-	if current_recipe.end:
-		current_recipe = None
+
 	return response
 
 def change_sender(request):
