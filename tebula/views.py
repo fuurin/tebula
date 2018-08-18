@@ -7,7 +7,7 @@ from .modules.recipe import Recipe
 from .modules.senders import get_sender_for
 from .modules.crawler import crawl
 
-sender = get_sender_for(platform='Slack')
+sender = get_sender_for(platform='Dummy')
 current_recipe = None
 
 
