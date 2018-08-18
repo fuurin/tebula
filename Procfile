@@ -1,1 +1,1 @@
-web: gunicorn IshinomakiHackathon2018.wsgi --log-file -
+web: gunicorn IshinomakiHackathon2018.wsgi --workers=1 --log-file -
