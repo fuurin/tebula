@@ -1,3 +1,6 @@
+from .crawler import crawl
+import json
+
 class UserData():
 	def __init__(self):
 		self._recipe_id = None
@@ -16,9 +19,11 @@ class UserData():
 		# validation
 		if not value.isdigit(): return
 
+		scraping_result = json.loads(crawl(value, do_remove_emoji=True))
+		self._scraping_result = scraping_result
+		if not int(scraping_result['success']): return
+
 		self._recipe_id = value
-		# クローリング
-		# self._scraping_result[""] = "hogehoge"
 		self._recipe_step = 0
 
 	@property
@@ -29,5 +34,9 @@ class UserData():
 	def next_step(self):
 		if self._recipe_step != None:
 			self._recipe_step = self._recipe_step + 1
+
+	@property
+	def scraping_result(self):
+		return self._scraping_result
 
 userdata = UserData()
