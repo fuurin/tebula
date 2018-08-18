@@ -9,12 +9,12 @@ from .modules.crawler import crawl
 
 sender = get_sender_for(platform='Dummy')
 current_recipe = None
-current_recipe_changed=False
 
 
 def register(request):
 	global current_recipe
 	global current_recipe_changed
+	global current_step_changed
 
 	recipe_id = request.GET.get('recipe_id')
 	try:
@@ -24,6 +24,7 @@ def register(request):
 		return HttpResponseBadRequest(str(e))
 
 	current_recipe_changed = True
+	current_step_changed = True
 	result = f'レシピID: {recipe_id} レシピタイトル: {current_recipe.content["title"]} が設定されました\n'
 
 	try:
@@ -78,10 +79,12 @@ def step(request):
 
 def next_step(request):
 	global current_recipe
+	global current_step_changed
 
 	if not current_recipe:
 		return HttpResponse("レシピIDが設定されていません")
 
+	current_step_changed = True
 	current_recipe.next_step()
 	result = f"ステップ {current_recipe.step} になりました"
 	try:
@@ -94,14 +97,6 @@ def next_step(request):
 	if current_recipe.end:
 		current_recipe = None
 	return response
-
-def listen(request):
-	global current_recipe_changed
-	if current_recipe_changed:
-		current_recipe_changed = False
-		return HttpResponse(current_recipe.content['title'])
-	else:
-		return HttpResponse("")
 
 def change_sender(request):
 	global sender
