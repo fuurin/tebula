@@ -11,6 +11,7 @@ class LINESender(BaseSender):
 	ENV_DESTINATION_ID = 'LINE_DESTINATION_ID'
 
 	def __init__(self, channel_access_token=None, destination=None):
+		self.platform='LINE'
 		if channel_access_token is None:
 			self.channel_access_token = os.getenv(
 				LINESender.ENV_CHHANNEL_ACCESS_TOKEN

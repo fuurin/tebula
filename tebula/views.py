@@ -1,20 +1,23 @@
+import traceback
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.http import HttpResponseBadRequest
+from django.http import JsonResponse
 from .modules.recipe import Recipe
 from .modules.senders import get_sender_for
 from .modules.crawler import crawl
 
-sender = get_sender_for(platform='LINE')
+sender = get_sender_for(platform='Slack')
 current_recipe = None
 
 
 def register(request):
 	global current_recipe
-	recipe_id = request.GET.get('recipe_id')
 	try:
+		recipe_id = request.GET.get('recipe_id')
 		current_recipe = crawl(recipe_id)
 	except Exception as e:
-		return HttpResponse(str(e))
+		return HttpResponseBadRequest(str(e))
 
 	result = f'レシピID: {recipe_id} レシピタイトル: {current_recipe.content["title"]} が設定されました\n'
 
@@ -22,17 +25,43 @@ def register(request):
 		sender.send_recipe(current_recipe)
 		sender.send_step(current_recipe)
 	except Exception as e:
-		result += f'LINEとの通信に失敗しました: {str(e)}'
+		result += f'{sender.platform}との通信に失敗しました: {str(e)}\n'
+		result += traceback.format_exc()
 	
 	return HttpResponse(result)
 
-def recipe(request):
+def recipe(request):	
 	if current_recipe:
-		response = HttpResponse(f"レシピID: {current_recipe.recipe_id} が設定されています")
+		return JsonResponse({
+			'recipe': {
+				'recipe_id': current_recipe.recipe_id,
+				'current_step': current_recipe.step,
+				'content': current_recipe.content
+			},
+			'cooking': True
+		})
 	else:
-		response = HttpResponse("レシピIDが設定されていません")
+		return JsonResponse({
+			'recipe': {
+				'recipe_id': None,
+				'current_step': -1,
+				'content': None
+			},
+			'cooking': False
+		})
 
-	return response
+
+def current_step(request):
+	if current_recipe:
+		return JsonResponse({
+			'current_step': current_recipe.step,
+			'cooking': True
+		})
+	else:
+		return JsonResponse({
+			'current_step': -1,
+			'cooking': False
+		})
 
 def step(request):
 	if current_recipe:
@@ -49,9 +78,26 @@ def next_step(request):
 		return HttpResponse("レシピIDが設定されていません")
 
 	current_recipe.next_step()
-	sender.send_step(current_recipe)
+	result = f"ステップ {current_recipe.step} になりました"
+	try:
+		sender.send_step(current_recipe)
+	except Exception as e:
+		result += f'{sender.platform}との通信に失敗しました: {str(e)}\n'
+		result += traceback.format_exc()
 
-	response = HttpResponse(f"ステップ {current_recipe.step} になりました")
+	response = HttpResponse(result)
 	if current_recipe.end:
 		current_recipe = None
 	return response
+
+def change_sender(request):
+	global sender
+	try:
+		platform = request.GET.get('platform')
+		sender = get_sender_for(platform)
+	except Exception as e:
+		return HttpResponseBadRequest(str(e))
+	if current_recipe:
+		sender.send_recipe(current_recipe)
+		sender.send_step(current_recipe)
+	return HttpResponse(f'プラットフォームを{platform}に変更しました')
