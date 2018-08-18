@@ -1,44 +1,57 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .modules.user_data import userdata
+from .modules.recipe import Recipe
+from .modules.senders import get_sender_for
+from .modules.crawler import crawl
+
+sender = get_sender_for(platform='LINE')
+current_recipe = None
+
 
 def register(request):
-
+	global current_recipe
 	recipe_id = request.GET.get('recipe_id')
+	try:
+		current_recipe = crawl(recipe_id)
+	except Exception as e:
+		return HttpResponse(str(e))
 
-	userdata.recipe_id = recipe_id
+	result = f'レシピID: {recipe_id} レシピタイトル: {current_recipe.content["title"]} が設定されました\n'
 
-	if userdata.isset() and userdata.scraping_result['success']:
-    		response = HttpResponse("レシピID: {0} レシピタイトル: {1} が設定されました".format(userdata.recipe_id, userdata.scraping_result['title']))
-	else:
-		response = HttpResponse("そのレシピIDは存在しません")
+	try:
+		sender.send_recipe(current_recipe)
+		sender.send_step(current_recipe)
+	except Exception as e:
+		result += f'LINEとの通信に失敗しました: {str(e)}'
 	
-	return response
+	return HttpResponse(result)
 
 def recipe(request):
-
-	if userdata.isset():
-		response = HttpResponse("レシピID: {0} が設定されています".format(userdata.recipe_id))
+	if current_recipe:
+		response = HttpResponse(f"レシピID: {current_recipe.recipe_id} が設定されています")
 	else:
 		response = HttpResponse("レシピIDが設定されていません")
 
 	return response
 
 def step(request):
-
-	if userdata.isset():
-		response = HttpResponse("今はステップ {0} です".format(userdata.recipe_step))
+	if current_recipe:
+		response = HttpResponse(f"今はステップ {current_recipe.step} です")
 	else:
 		response = HttpResponse("レシピIDが設定されていません")
 
 	return response
 
 def next_step(request):
-	
-	if userdata.isset():
-		userdata.next_step()
-		response = HttpResponse("ステップ {0} になりました".format(userdata.recipe_step))
-	else:
-		response = HttpResponse("レシピIDが設定されていません")
+	global current_recipe
 
+	if not current_recipe:
+		return HttpResponse("レシピIDが設定されていません")
+
+	current_recipe.next_step()
+	sender.send_step(current_recipe)
+
+	response = HttpResponse(f"ステップ {current_recipe.step} になりました")
+	if current_recipe.end:
+		current_recipe = None
 	return response
