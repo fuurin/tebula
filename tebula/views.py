@@ -1,4 +1,5 @@
 import traceback
+import re
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
@@ -15,6 +16,7 @@ def register(request):
 	global current_recipe
 	try:
 		recipe_id = request.GET.get('recipe_id')
+		recipe_id = re.sub('[^0-9]', '', recipe_id)
 		current_recipe = crawl(recipe_id)
 	except Exception as e:
 		return HttpResponseBadRequest(str(e))
