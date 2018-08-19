@@ -1,4 +1,5 @@
 import traceback
+import re
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
@@ -15,6 +16,7 @@ def register(request):
 	global current_recipe
 	try:
 		recipe_id = request.GET.get('recipe_id')
+		recipe_id = re.sub('[^0-9]', '', recipe_id)
 		current_recipe = crawl(recipe_id)
 	except Exception as e:
 		return HttpResponseBadRequest(str(e))
@@ -30,6 +32,14 @@ def register(request):
 	
 	return HttpResponse(result)
 
+
+def reset(request):
+	global sender
+	global current_recipe
+	current_recipe = None
+	sender = get_sender_for(platform='Dummy')
+	return HttpResponse('リセットしました')
+
 def recipe(request):	
 	if current_recipe:
 		return JsonResponse({
@@ -38,7 +48,6 @@ def recipe(request):
 				'current_step': current_recipe.step,
 				'content': current_recipe.content
 			},
-			'cooking': True
 		})
 	else:
 		return JsonResponse({
@@ -47,7 +56,6 @@ def recipe(request):
 				'current_step': -1,
 				'content': None
 			},
-			'cooking': False
 		})
 
 
@@ -55,12 +63,10 @@ def current_step(request):
 	if current_recipe:
 		return JsonResponse({
 			'current_step': current_recipe.step,
-			'cooking': True
 		})
 	else:
 		return JsonResponse({
 			'current_step': -1,
-			'cooking': False
 		})
 
 def step(request):
@@ -76,8 +82,8 @@ def next_step(request):
 
 	if not current_recipe:
 		return HttpResponse("レシピIDが設定されていません")
-
-	current_recipe.next_step()
+	if not current_recipe.end:
+		current_recipe.next_step()
 	result = f"ステップ {current_recipe.step} になりました"
 	try:
 		sender.send_step(current_recipe)
@@ -86,8 +92,7 @@ def next_step(request):
 		result += traceback.format_exc()
 
 	response = HttpResponse(result)
-	if current_recipe.end:
-		current_recipe = None
+
 	return response
 
 def change_sender(request):
