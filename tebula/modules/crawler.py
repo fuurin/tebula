@@ -44,7 +44,10 @@ def crawl(recipe_id):
     def get_ingredients():
         ingredients = []
         for ingredient_tag in soup.find_all("div", class_="ingredient_row"):
-            ingredients.append(get_ingredient(ingredient_tag))
+            try:
+                ingredients.append(get_ingredient(ingredient_tag))
+            except:
+                pass
         return ingredients
 
 
