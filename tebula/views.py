@@ -32,6 +32,14 @@ def register(request):
 	
 	return HttpResponse(result)
 
+
+def reset(request):
+	global sender
+	global current_recipe
+	current_recipe = None
+	sender = get_sender_for(platform='Dummy')
+	return HttpResponse('リセットしました')
+
 def recipe(request):	
 	if current_recipe:
 		return JsonResponse({
