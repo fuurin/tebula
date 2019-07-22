@@ -89,6 +89,8 @@ def next_step(request):
 
 	if not current_recipe:
 		return HttpResponse("レシピIDが設定されていません")
+
+	current_recipe_changed = True
 	if not current_recipe.end:
 		current_recipe.next_step()
 	result = f"ステップ {current_recipe.step} になりました"
