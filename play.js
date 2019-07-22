@@ -2,7 +2,7 @@
 * 設定
 */
 const googlehome = require('google-home-notifier');
-const msg = process.argv[2] || 'なんか喋ってよ'; // process.argv[2]で引数を取得。ない場合はデフォルトメッセージを代入
+const msg = process.argv[2] || 'Google Home を node.js で喋らせる'; // process.argv[2]で引数を取得。ない場合はデフォルトメッセージを代入
 
 
 /**
