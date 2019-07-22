@@ -14,6 +14,10 @@ current_recipe = None
 
 def register(request):
 	global current_recipe
+	global current_recipe_changed
+	global current_step_changed
+
+	recipe_id = request.GET.get('recipe_id')
 	try:
 		recipe_id = request.GET.get('recipe_id')
 		recipe_id = re.sub('[^0-9]', '', recipe_id)
@@ -21,6 +25,8 @@ def register(request):
 	except Exception as e:
 		return HttpResponseBadRequest(str(e))
 
+	current_recipe_changed = True
+	current_step_changed = True
 	result = f'レシピID: {recipe_id} レシピタイトル: {current_recipe.content["title"]} が設定されました\n'
 
 	try:
@@ -79,6 +85,7 @@ def step(request):
 
 def next_step(request):
 	global current_recipe
+	global current_step_changed
 
 	if not current_recipe:
 		return HttpResponse("レシピIDが設定されていません")

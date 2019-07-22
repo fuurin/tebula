@@ -23,7 +23,7 @@ class Recipe():
 
 	@property
 	def end(self):
-		return self.__recipe_step >= len(self.__content['steps']) - 1
+		return self.__recipe_step >= len(self.__content['steps'])
 
 	@property
 	def content(self):
